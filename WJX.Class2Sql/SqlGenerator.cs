@@ -136,7 +136,7 @@ namespace WJX.Class2Sql
             return sql;
         }
 
-        public string InsertInto(bool On_Duplicate_Key_Update=true, bool useParameters=true)
+        public string InsertInto(bool On_Duplicate_Key_Update = true, bool useParameters = true)
         {
             string sql = $"INSERT INTO {TableName} ";
             string tempValue = "";
@@ -149,12 +149,13 @@ namespace WJX.Class2Sql
                 foreach (var name in TargetProperties)
                 {
                     sqlColumn += name + ",";
-                    sqlValue += "@" + name+",";
-                    sqlColumnValue += name + "=@"+name+",";
+                    sqlValue += "@" + name + ",";
+                    sqlColumnValue += name + "=@" + name + ",";
                 }
             }
             else
             {
+                // todo: 测试可行性
                 foreach (var name in TargetProperties)
                 {
                     Type type = GetValueType(name);
@@ -163,7 +164,7 @@ namespace WJX.Class2Sql
                     sqlColumn += name + ",";
                     sqlColumnValue += name + "=";
 
-                    if (type.Name == "string"||type.Name=="char")
+                    if (type.Name == "string" || type.Name == "char")
                     {
                         sqlValue += $"'{tempValue}',";
                         sqlColumnValue += $"'{tempValue}',";
@@ -177,7 +178,7 @@ namespace WJX.Class2Sql
             }
 
             sqlColumn = sqlColumn.TrimEnd(',');
-            sqlValue = sqlValue.TrimEnd(',');            
+            sqlValue = sqlValue.TrimEnd(',');
 
             sql += $"({sqlColumn}) VALUES({sqlValue}) ";
             if (On_Duplicate_Key_Update)
@@ -189,9 +190,19 @@ namespace WJX.Class2Sql
             return sql;
         }
 
+        public string GenerateCodeForMySql(string MySqlCommandInstance)
+        {
+            string code = "";
+            foreach (var name in TargetProperties)
+            {
+                code += $"{MySqlCommandInstance}.Parameters.AddWithValue(\"@{name}\", {name}); ";
+            }
+            return code;
+        }
+
         private string GetValue(string propertyName)
         {
-            return (string) GetProperty(propertyName).GetValue(TargetObject);
+            return (string)GetProperty(propertyName).GetValue(TargetObject);
         }
 
         private Type GetValueType(string propertyName)
