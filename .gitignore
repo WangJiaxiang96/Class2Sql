@@ -11,7 +11,7 @@
 *.userprefs
 
 # Nuget spec file
-*.nuspec
+# *.nuspec
 
 # Build results
 [Dd]ebug/

@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WJX.Class2Sql</name>
+    </assembly>
+    <members>
+        <member name="T:WJX.Class2Sql.ClassGenerator">
+            <summary>
+            将Sql调用的结果反序列化成类EN
+            </summary>
+        </member>
+        <member name="T:WJX.Class2Sql.SqlGenerator">
+            <summary>
+            Generate Sql for the properties of a class
+            </summary>
+        </member>
+        <member name="P:WJX.Class2Sql.SqlGenerator.TableName">
+            <summary>
+            指定创建表时的表名，默认为指定类的类名
+            </summary>
+        </member>
+        <member name="P:WJX.Class2Sql.SqlGenerator.TargetObject">
+            <summary>
+            设置指定类，不能为null
+            </summary>
+        </member>
+        <member name="P:WJX.Class2Sql.SqlGenerator.IgnoredProperties">
+            <summary>
+            生成Sql语句时忽略的属性的名，默认为null，即使用全部属性生成Sql语句
+            </summary>
+        </member>
+        <member name="M:WJX.Class2Sql.SqlGenerator.#ctor(System.Object)">
+            <summary>
+            初始化SqlGenerator
+            </summary>
+            <param name="targetClass">指定一个对象，将根据此对象的属性生成Sql，不能为null</param>
+        </member>
+        <member name="M:WJX.Class2Sql.SqlGenerator.#ctor(System.Object,System.String,System.Collections.Generic.List{System.String})">
+            <summary>
+            初始化SqlGenerator
+            </summary>
+            <param name="targetObject">指定一个对象，将根据此对象的属性生成Sql，不能为null</param>
+            <param name="tableName">指定创建表时的表名，默认为指定类的类名</param>
+            <param name="ignoredProperties">生成Sql语句时忽略的属性的名，默认为null，即使用全部属性生成Sql语句</param>
+        </member>
+        <member name="M:WJX.Class2Sql.SqlGenerator.CreateTable(System.Boolean)">
+            <summary>
+            使用属性名生成 CreateTable创建表 的sql
+            </summary>
+            <param name="If_Not_Exists">如果存在该表则不创建</param>
+            <returns></returns>
+        </member>
+        <member name="M:WJX.Class2Sql.SqlGenerator.InsertInto(System.Boolean,System.Boolean)">
+            <summary>
+            使用属性名生成 Insert插入 的sql
+            </summary>
+            <param name="On_Duplicate_Key_Update">根据主键判断，该条数据如果不存在则插入，存在则更新</param>
+            <param name="useParameters">是否在Sql中使用 @PropertyName 占位符</param>
+            <returns></returns>
+        </member>
+        <member name="M:WJX.Class2Sql.SqlGenerator.GenerateCodeForMySql(System.String)">
+            <summary>
+            根据MySqlCommand实例生成给Sql语句中占位符赋值的C#代码，若需忽略某些属性，请预先设置IgnoredProperties
+            </summary>
+            <example>
+            <code>
+             ...
+             
+             SqlGenerator sqlGenerator=new SqlGenerator(SomeClass);
+             MySqlCommand cmd=new ...;
+             string code=sqlGenerator.GenerateCodeForMySql("cmd");
+             //在此处添加断点，将变量code的值复制，停止调试，然后把代码粘贴在下方，最后删除上一条语句。
+             
+             ...
+             
+            </code>
+            </example>
+            <param name="MySqlCommandInstance">MySqlCommand实例的名</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

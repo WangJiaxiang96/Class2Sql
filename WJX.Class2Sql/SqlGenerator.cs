@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Reflection;
 
 namespace WJX.Class2Sql
-{
+{    
+    /// <summary>
+    /// 将指定类的属性生成各种Sql语句
+    /// </summary>
     public class SqlGenerator
     {
         #region Fields        
@@ -16,13 +19,16 @@ namespace WJX.Class2Sql
         #endregion
 
         #region Properties      
+        /// <summary>
+        /// 指定创建表时的表名，默认为指定类的类名
+        /// </summary>
         public string TableName
         {
             get => _tableName; set
             {
                 if (value == null)
                 {
-                    _tableName = _classType.Name;
+                    _tableName = ClassType.Name;
                 }
                 else
                 {
@@ -50,11 +56,18 @@ namespace WJX.Class2Sql
             }
         }
 
+        /// <summary>
+        /// 设置指定类，不能为null
+        /// </summary>
         public object TargetObject
         {
             get { return _targetObject; }
             set
             {
+                if (_targetObject == null)
+                {
+                    throw new NullReferenceException("\"TargetObject\" is NULL, please set an instance of class");
+                }
                 //设置Type
                 if (value != null)
                 {
@@ -64,6 +77,9 @@ namespace WJX.Class2Sql
             }
         }
 
+        /// <summary>
+        /// 生成Sql语句时忽略的属性的名，默认为null，即使用全部属性生成Sql语句
+        /// </summary>
         public List<string> IgnoredProperties
         {
             get => _ignoredProperties;
@@ -80,16 +96,21 @@ namespace WJX.Class2Sql
         #endregion
 
         #region Contructors
-        public SqlGenerator(object targetClass) : this(targetClass, null)
+        /// <summary>
+        /// 初始化SqlGenerator
+        /// </summary>
+        /// <param name="targetClass">指定一个对象，将根据此对象的属性生成Sql，不能为null</param>
+        public SqlGenerator(object targetClass) : this(targetClass, null,null)
         {
         }
-
-        public SqlGenerator(object targetClass, string tableName) : this(targetClass, tableName, null)
-        {
-        }
-
+        /// <summary>
+        /// 初始化SqlGenerator
+        /// </summary>
+        /// <param name="targetObject">指定一个对象，将根据此对象的属性生成Sql，不能为null</param>
+        /// <param name="tableName">指定创建表时的表名，默认为指定类的类名</param>
+        /// <param name="ignoredProperties">生成Sql语句时忽略的属性的名，默认为null，即使用全部属性生成Sql语句</param>
         public SqlGenerator(object targetObject, string tableName, List<string> ignoredProperties)
-        {
+        {            
             AllProperties = null;
             ClassType = null;
             TargetProperties = null;
@@ -100,10 +121,15 @@ namespace WJX.Class2Sql
             TableName = tableName;
         }
         #endregion
-
-        public string CreateTable(bool If_Not_Exists, bool SkipIgnoredProperties)
+        /// <summary>
+        /// 使用属性名生成 CreateTable创建表 的sql
+        /// </summary>
+        /// <param name="If_Not_Exists">如果存在该表则不创建</param>
+        /// <returns></returns>
+        public string CreateTable(bool If_Not_Exists=true)
         {
             // todo: 支持设置主键
+            // todo: 生成的sql末端包含多余的","，未检查是否允许
             string sql = $"CREATE TABLE {(If_Not_Exists ? "IF NOT EXISTS" : "")} {TableName} (";
             string temp = null;
             foreach (var name in TargetProperties)
@@ -135,7 +161,12 @@ namespace WJX.Class2Sql
             sql += ");";
             return sql;
         }
-
+        /// <summary>
+        /// 使用属性名生成 Insert插入 的sql
+        /// </summary>
+        /// <param name="On_Duplicate_Key_Update">根据主键判断，该条数据如果不存在则插入，存在则更新</param>
+        /// <param name="useParameters">是否在Sql中使用 @PropertyName 占位符</param>
+        /// <returns></returns>
         public string InsertInto(bool On_Duplicate_Key_Update = true, bool useParameters = true)
         {
             string sql = $"INSERT INTO {TableName} ";
@@ -189,7 +220,24 @@ namespace WJX.Class2Sql
             sql += ";";
             return sql;
         }
-
+        /// <summary>
+        /// 根据<c>MySqlCommand</c>实例生成给Sql语句中占位符赋值的C#代码，若需忽略某些属性，请预先设置<c>IgnoredProperties</c>
+        /// </summary>
+        /// <example>
+        /// <code>
+        ///  ...
+        ///  
+        ///  SqlGenerator sqlGenerator=new SqlGenerator(SomeClass);
+        ///  MySqlCommand cmd=new ...;
+        ///  string code=sqlGenerator.GenerateCodeForMySql("cmd");
+        ///  //在此处添加断点，将变量code的值复制，停止调试，然后把代码粘贴在下方，最后删除上一条语句。
+        ///  
+        ///  ...
+        ///  
+        /// </code>
+        /// </example>
+        /// <param name="MySqlCommandInstance">MySqlCommand实例的名</param>
+        /// <returns></returns>
         public string GenerateCodeForMySql(string MySqlCommandInstance)
         {
             string code = "";
